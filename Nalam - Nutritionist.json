@@ -130,7 +130,7 @@
       "name": "GPT 4 Mini",
       "credentials": {
         "openAiApi": {
-          "id": "UWxF4ntMnnlf1aXS",
+          "id": "{{ API_KEY }}",
           "name": "OpenAi account"
         }
       }
@@ -169,7 +169,7 @@
       "name": "GPT 4 Mini1",
       "credentials": {
         "openAiApi": {
-          "id": "UWxF4ntMnnlf1aXS",
+          "id": "{{ API_KEY }}",
           "name": "OpenAi account"
         }
       }
@@ -182,7 +182,7 @@
           "parameters": [
             {
               "name": "key",
-              "value": "AIzaSyDQdTzXwhT2o59n070iBx2lSKQVi5LE9r4"
+              "value": "{{ API_KEY }}"
             },
             {
               "name": "q",
@@ -219,7 +219,7 @@
     },
     {
       "parameters": {
-        "chatId": "@oorgai",
+        "chatId": "{{ TELEGRAM CHANNEL }}",
         "text": "={{ $json.output }}",
         "additionalFields": {
           "parse_mode": "HTML"
@@ -236,7 +236,7 @@
       "webhookId": "d728eae0-1aa7-4d13-b78c-e9a5d5bf4efa",
       "credentials": {
         "telegramApi": {
-          "id": "sBZkobn9kAgSqoya",
+          "id": "{{ API_KEY }}",
           "name": "Telegram account"
         }
       }
