@@ -1,0 +1,615 @@
+{
+  "name": "Test Automation POM Generator",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2448,
+        -8000
+      ],
+      "id": "7105bf97-c0b9-46ad-a160-b78211f10004",
+      "name": "When clicking \u2018Execute workflow\u2019"
+    },
+    {
+      "parameters": {
+        "content": "## Input - Enter Website to Scrape and Generate POM\n",
+        "height": 256,
+        "width": 608,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2512,
+        -8064
+      ],
+      "typeVersion": 1,
+      "id": "a7b99fa9-35c5-46e5-8997-fc6c323edad3",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "Sends an HTTP request to each generated sitemap URL and fetches the raw response to check if the sitemap exists and contains valid data.",
+        "height": 304,
+        "width": 256,
+        "color": 2
+      },
+      "id": "bc253871-1523-4159-a8aa-9e106b120147",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1344,
+        -7552
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Exclude Sitemap URLs:\n1. This filter checks if the page_url contains the word \"sitemap\".\n2. If it does, the URL is excluded; otherwise, it passes forward.",
+        "height": 352,
+        "width": 272,
+        "color": 2
+      },
+      "id": "137b7679-4327-48d4-8604-d702329edfd1",
+      "name": "Sticky Note6",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -448,
+        -8064
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## \ud83d\udccc Universal Test Automation POM Generator\n\nThis automation is designed to simplify and automate the collection of website page URLs from sitemap URLs and generate Page Object Design Pattern used for Test Automation.\n\nIt begins when a user submits the Website URL. The submitted URL is then prepared and standardized to ensure the domain is ready for sitemap discovery. From there, the automation automatically builds possible sitemap URLs (like /sitemap.xml or /sitemap_index.xml) and checks which of them are valid and accessible.\n\nOnce valid sitemaps are found, the automation fetches their XML content and extracts all page URLs listed inside. To keep the data clean, it applies a filter to remove unwanted entries \u2014 specifically, any URL that contains the word \u201csitemap\u201d is excluded. This ensures that only actual content pages (such as product, service, or blog pages) are retained.\n\nIn the final step, these refined URLs are sent to Agent which converts these page data into Page Object Design Pattern used widely in Test Automation Industry\n\nBuilt with \u2764\ufe0f by Balaji Santhana Krishnan \nhttps://www.linkedin.com/in/balaskrishnan/ ",
+        "height": 368,
+        "width": 2288
+      },
+      "id": "f1ed5e09-a8e7-4833-9fd3-e42021345979",
+      "name": "Sticky Note7",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2512,
+        -8576
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputData = $input.first().json;\nlet baseUrl = $input.first().json['Website To Scrape'];\n\nif (!baseUrl) {\n  throw new Error(\"No URL provided\");\n}\n\nbaseUrl = baseUrl.replace(/\\/$/, '');\n\nlet domain = '';\nif (baseUrl.includes('://')) {\n  const parts = baseUrl.split('/');\n  domain = parts[0] + '//' + parts[2];\n} else {\n  domain = 'https://' + baseUrl;\n}\n\nconst urls = [\n  `${domain}/robots.txt`,\n  `${domain}/sitemap.xml`,\n  `${domain}/sitemap_index.xml`,\n  `${domain}/sitemap-index.xml`,\n  `${domain}/sitemap1.xml`,\n  `${domain}/sitemap/sitemap.xml`,\n  `${domain}/sitemaps/sitemap.xml`\n];\n\nreturn urls.map(url => ({ sitemap_url: url }));"
+      },
+      "id": "d5b8403e-d4c8-4a6f-901d-5f89dc425bc2",
+      "name": "Build sitemap URLs",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -1792,
+        -7952
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "ec50521f-dc3e-4a6b-8405-d0023bdc53c0",
+      "name": "Sitemap URL Check",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        -1536,
+        -7952
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.sitemap_url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "id": "9706f6df-1eb4-4d4f-8fe6-bbb15959d66b",
+      "name": "Fetch Sitemap Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -1264,
+        -7424
+      ],
+      "typeVersion": 4.2,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "bf0c94e8-a8c6-4419-9b18-cf5d1a01e577",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.data }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7d4175fc-96d0-4823-817a-d41db76cd30b",
+      "name": "Filter Non-Empty Sitemap Responses",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -1296,
+        -7872
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "jsCode": "const allUrls = [];\n\n$input.all().forEach(item => {\n  const content = item.json.data || '';\n\n  const robotMatches = [...content.matchAll(/Sitemap:\\s*(\\S+)/gi)];\n  robotMatches.forEach(match => {\n    allUrls.push(match[1]);\n  });\n\n  const locMatches = [...content.matchAll(/<loc>\\s*(.*?)\\s*<\\/loc>/gi)];\n  locMatches.forEach(match => {\n    allUrls.push(match[1]);\n  });\n});\n\nconst uniqueUrls = [...new Set(allUrls)];\n\nreturn uniqueUrls.map(url => ({ json: { sitemap_url: url }}));"
+      },
+      "id": "e929a840-0a02-4be8-9ef1-67c9bf48ed63",
+      "name": "Extract Sitemap URLs",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -1072,
+        -7888
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "method": "=GET",
+        "url": "={{ $json.sitemap_url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "id": "e647b4ab-071d-40be-89dc-4bcab6c46d67",
+      "name": "Fetch Sitemap Pages XML",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -848,
+        -7888
+      ],
+      "typeVersion": 4.2,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const urls = new Set();\n\n$input.all().forEach(item => {\n  const content = item.json.data || '';\n\n  const xmlMatches = [...content.matchAll(/<loc>(.*?)<\\/loc>/gi)];\n  xmlMatches.forEach(match => {\n    const url = match[1].trim();\n    urls.add(url);\n  });\n\n  const htmlMatches = [...content.matchAll(/<a\\s[^>]*href=[\"']([^\"']+)[\"']/gi)];\n  htmlMatches.forEach(match => {\n    const url = match[1].trim();\n    if (url.startsWith('/') || url.startsWith('http')) {\n      urls.add(url);\n    }\n  });\n});\n\nif (urls.size === 0) {\n  return [{ json: { message: \"No URLs found in XML or HTML content\" }}];\n}\n\nreturn Array.from(urls).map(url => ({\n  json: { page_url: url }\n}));"
+      },
+      "id": "c6bac5d4-fa97-42c8-adcc-f37cf3bbbd7a",
+      "name": "Extract Page URLs from Sitemap",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -624,
+        -7888
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "303d0665-ac2d-452b-8678-a05e53a7372b",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              },
+              "leftValue": "{{ $json.page_url }}",
+              "rightValue": "sitemap"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "962766c0-70f9-4272-9d84-d42411466c95",
+      "name": "Exclude the Sitemap URLs",
+      "type": "n8n-nodes-base.filter",
+      "position": [
+        -368,
+        -7888
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "content": "## Build sitemap urls:\nCreates possible sitemap URLs like /sitemap.xml, /sitemap_index.xml, etc., for the domain.",
+        "height": 352,
+        "color": 2
+      },
+      "id": "9474bebc-9f8f-4137-a931-9f23d9b05d18",
+      "name": "Sticky Note8",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1856,
+        -8112
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Filter & Extract Sitemap Files\n\nFilter Non-Empty Sitemap Responses:\nFilters out sitemap URLs that are unreachable or returned empty responses to ensure only valid sitemaps are processed.\n\nExtract Sitemap URLs:\nParses sitemap index XML to extract all nested sitemap links (e.g., index-sitemap.xml, page-sitemap.xml) for further crawling.",
+        "height": 432,
+        "width": 400,
+        "color": 2
+      },
+      "id": "dd4ee592-8d3d-49bf-b1f4-c684a2e692d0",
+      "name": "Sticky Note9",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1328,
+        -8144
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Fetching Sitemap XML and Extracting Page URLs\n\n\nFetch Sitemap Pages XML:\nFinds HTTP request of each sitemap URL and retrieves the raw XML content for page extraction.\n\nExtract Page URLs from Sitemap:\nParses the XML data to extract individual page URLs listed inside the sitemap for further analysis or processing.\n\n",
+        "height": 432,
+        "width": 432,
+        "color": 2
+      },
+      "id": "cb88e810-3551-4ab5-9377-0c7e531d88ba",
+      "name": "Sticky Note10",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -912,
+        -8144
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -80,
+        -8016
+      ],
+      "id": "ef00562a-8d4b-4dc1-9d89-2d8ed8e7f38d",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "content": "## Run in Loop to feed in the markdown content to generate POM pattern for the page. \nHave not set a specific target to store the generated files(the last node in this section) , it can be configured to push the code to code repository or write the file to local storage or path\n",
+        "height": 464,
+        "width": 848,
+        "color": 2
+      },
+      "id": "f7ccb2f0-e9ec-4db3-bfb9-6ebe44fcd342",
+      "name": "Sticky Note12",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -144,
+        -8176
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "=GET",
+        "url": "={{ $json.page_url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "id": "949f74c2-e7d8-4766-b6e2-eafadceec129",
+      "name": "Fetch Page DOM",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        96,
+        -7920
+      ],
+      "typeVersion": 4.2,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a senior Test Automation Architect. Your job is to generate maintainable, reusable Page Object Model (POM) code from a single web page\u2019s metadata and HTML/markdown summary.\n{{ $json.data }} based on cypress\n\nDESIGN PRINCIPLES (BEST PRACTICES)\nA) POM responsibilities:\n   - Encapsulate selectors/locators and UI actions.\n   - Expose high-level methods that represent user intent (e.g., login(), searchProduct(), addToCart()).\n   - Do not contain assertions/expectations (keep assertions in tests), except minimal \u201cisLoaded() / waitForLoaded()\u201d helpers.\n\nB) Selector strategy (stability-first):\n   - Prefer: data-testid/data-test/qa attributes > id > name > aria-label/role > label text > stable CSS.\n   - Avoid brittle selectors: nth-child, deep CSS chains, random classes (unless no better alternative).\n   - If pageSummary includes multiple candidates, choose the most stable and unique.\n   - If you must use text-based locators, keep them centralized and explain in notes.\n\nC) Structure and naming:\n   - One class/module per page: <PageName>Page.\n   - Use consistent naming for locators and methods.\n   - Group locators by section (Header, Form, Table, Footer) if it improves readability.\n   - Provide 5\u201312 meaningful action methods (based on the pageSummary elements).\n   - Keep methods small; avoid \u201cgod methods\u201d.\n\nD) Reliability and waits:\n   - No hard sleeps.\n   - Use explicit waiting for element visibility / network idle / page readiness depending on stack.\n   - Include a waitForLoaded() or isLoaded() method with robust criteria (unique element on page).\n   - Handle common flakiness: waits before click/type, ensure element is visible/enabled.\n\nE) Data handling:\n   - Methods should accept parameters (e.g., typeEmail(email: string)).\n   - Use sensible defaults and optional params when helpful.\n   - No test data hard-coded into POM methods.\n\nF) Error handling:\n   - Provide clear errors when critical elements are missing (as feasible for the stack).\n   - Add guardrails: e.g., throw if required selector not found in input (and note it).\n\nG) Code style:\n   - Clean, readable, idiomatic for the language/framework.\n   - Include minimal but helpful comments only where it clarifies tricky parts.\n   - Export in a conventional way for the stack.\n   - Use formatting that matches standard tooling (prettier-like for TS, standard Java conventions).\n\nTECH STACK REQUIREMENTS\n\n1) Playwright (playwright-ts):\n   - TypeScript class with constructor(page: Page).\n   - Use Playwright locators: page.getByTestId / getByRole / getByLabel / locator.\n   - Expose async methods. Return values only if useful.\n   - Include a static or instance create() is optional, but keep it simple.\n   - Example skeleton:\n     export class LoginPage { constructor(private readonly page: Page) {} ... }\n\n2) Cypress (cypress-ts):\n   - Prefer a class or exported object with functions.\n   - Use Cypress best practices: cy.get(), cy.contains(), custom commands if needed (but don\u2019t create plugins).\n   - Keep selectors centralized.\n   - Methods should return Cypress.Chainable where appropriate.\n\n3) Selenium Java (selenium-java):\n   - Java class with WebDriver and By locators.\n   - Use WebDriverWait with ExpectedConditions; no Thread.sleep.\n   - Encapsulate interactions: click, type, select.\n   - Provide waitForLoaded() using a unique locator.\n\nPAGE NAME + PATH RULES (ORGANIZED STORAGE)\n- Derive pageName from pageTitle first; if empty, derive from pageUrl path.\n- Clean it: remove special chars, convert to PascalCase, suffix with \"Page\".\n- File path must be deterministic and organized:\n  - playwright-ts: \"src/pages/<PageName>.ts\"\n  - cypress-ts: \"cypress/pages/<PageName>.ts\"\n  - selenium-java: \"src/test/java/pages/<PageName>.java\"\n- If collisions occur (same pageName), append a short hash or unique suffix from URL.\n\nOUTPUT CONTENT RULES\n- Return JSON with exactly the file(s) for this single page.\n- Ensure generated content includes necessary imports.\n- Do not include tests/spec files; ONLY POM file for this page.\n- notes: include any limitations, missing selectors, or assumptions.\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        272,
+        -7920
+      ],
+      "id": "4881d0cb-d0f6-4cce-beda-6c3936613826",
+      "name": "POM Generator Agent"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f9708cee-7d45-4a72-adcc-9d6e991b226b",
+              "name": "Website To Scrape",
+              "value": "{{API_KEY_GOES_HERE}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2112,
+        -8000
+      ],
+      "id": "b011feef-1549-4e59-9394-13b0ec9884b1",
+      "name": "Set Website To Scrape"
+    },
+    {
+      "parameters": {
+        "jsCode": "/**\n * n8n Code node (JavaScript)\n * No fs needed.\n * Output:\n *  - json.filePath = \"cypress/pages/<ClassName>.ts\"\n *  - binary.file = the TS file content\n */\n\nfunction extractClassName(tsContent) {\n  const m = tsContent.match(/export\\s+class\\s+([A-Za-z_$][A-Za-z0-9_$]*)\\b/);\n  return m?.[1] || null;\n}\n\nconst out = [];\n\nfor (const item of items) {\n  // parse the \"output\" string\n  const payload = typeof item.json.output === 'string'\n    ? JSON.parse(item.json.output)\n    : item.json.output;\n\n  const cypressTs = payload[\"cypress-ts\"];\n  if (!cypressTs?.fileContent) {\n    throw new Error(\"Missing payload['cypress-ts'].fileContent\");\n  }\n\n  const fileContent = cypressTs.fileContent;\n  const className = extractClassName(fileContent);\n  if (!className) throw new Error(\"Could not find `export class <Name>` in fileContent\");\n\n  const fileName = `${className}.ts`;\n  const filePath = `cypress/pages/${fileName}`;\n\n  const base64 = Buffer.from(fileContent, 'utf8').toString('base64');\n\n  out.push({\n    json: {\n      className,\n      fileName,\n      filePath,\n    },\n    binary: {\n      file: {\n        data: base64,\n        mimeType: 'text/plain',\n        fileName,\n      },\n    },\n  });\n}\n\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        544,
+        -7920
+      ],
+      "id": "039e2b40-b5d6-46fc-b042-7b0aec86df4e",
+      "name": "Extract the Generated POM into a FilePath"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        240,
+        -7664
+      ],
+      "id": "f0be7af8-71e3-4e2b-b185-d9d38ba211ec",
+      "name": "GPT 4.1 Mini",
+      "credentials": {
+        "openAiApi": {
+          "id": "{{API_KEY_GOES_HERE}}",
+          "name": "{{API_KEY_GOES_HERE}}"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking \u2018Execute workflow\u2019": {
+      "main": [
+        [
+          {
+            "node": "Set Website To Scrape",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build sitemap URLs": {
+      "main": [
+        [
+          {
+            "node": "Sitemap URL Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sitemap URL Check": {
+      "main": [
+        [
+          {
+            "node": "Filter Non-Empty Sitemap Responses",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fetch Sitemap Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Sitemap Data": {
+      "main": [
+        [
+          {
+            "node": "Sitemap URL Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Non-Empty Sitemap Responses": {
+      "main": [
+        [
+          {
+            "node": "Extract Sitemap URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Sitemap URLs": {
+      "main": [
+        [
+          {
+            "node": "Fetch Sitemap Pages XML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Sitemap Pages XML": {
+      "main": [
+        [
+          {
+            "node": "Extract Page URLs from Sitemap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Page URLs from Sitemap": {
+      "main": [
+        [
+          {
+            "node": "Exclude the Sitemap URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Exclude the Sitemap URLs": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Fetch Page DOM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Page DOM": {
+      "main": [
+        [
+          {
+            "node": "POM Generator Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POM Generator Agent": {
+      "main": [
+        [
+          {
+            "node": "Extract the Generated POM into a FilePath",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Website To Scrape": {
+      "main": [
+        [
+          {
+            "node": "Build sitemap URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract the Generated POM into a FilePath": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT 4.1 Mini": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "POM Generator Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b30d578d-4d4f-4760-be82-38182c9b87e4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "{{API_KEY_GOES_HERE}}"
+  },
+  "id": "meYLVqylsHZ3yI1Z",
+  "tags": [
+    {
+      "updatedAt": "2026-01-05T10:13:34.513Z",
+      "createdAt": "2026-01-05T10:13:34.513Z",
+      "id": "4WBOmxNAVerz6otb",
+      "name": "QE"
+    },
+    {
+      "updatedAt": "2025-11-20T13:03:55.690Z",
+      "createdAt": "2025-11-20T13:03:55.690Z",
+      "id": "KHP6Yvz96Ftzzu9G",
+      "name": "Bala"
+    }
+  ]
+}
